@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import NamedTuple, Optional
+from typing import Optional
 
 from git import Commit
 from github.Issue import Issue
