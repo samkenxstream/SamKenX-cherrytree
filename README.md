@@ -1,7 +1,6 @@
 # Cherry Tree
 
 <img src="https://i.imgur.com/QGyxImm.jpg" title="Cherry Tree" width="250" />
-<img src="https://user-images.githubusercontent.com/487433/64575430-b62bff00-d328-11e9-80db-886c5d287941.png" title="cli screenshot" />
 
 Cherry Tree is a set of tools that were originally designed to help
 build releases for
@@ -11,8 +10,8 @@ that wants to implement a similar workflow.
 
 Ideas behind `cherrytree` include:
 * Github label driven development / releases
-* Make release files from specifying base reference and Github labels
-* Bake release branches/SHAs from said config files
+* Make release from specifying base reference and Github labels
+* Apply cherries in correct order
 * Follow a base reference + cherries approach
 
 ## An example build file
