@@ -10,6 +10,7 @@ from github.Issue import Issue
 from cherrytree.github_utils import (
     commit_pr_number,
     deduplicate_prs,
+    get_issue,
     get_issues_from_labels,
     git_get_current_head,
     os_system,
@@ -35,6 +36,7 @@ class CherryTreeBranch:
     blocking_labels: List[str]
     branch_commits: Dict[str, Dict[int, Commit]]
     missing_pull_requests: List[Issue]
+    pull_requests: List[int]
     cherries: List[Cherry]
     blocking_pr_ids: List[int]
 
@@ -45,10 +47,12 @@ class CherryTreeBranch:
         main_branch: str,
         labels: List[str],
         blocking_labels: List[str],
+        pull_requests: List[int],
     ):
         self.repo = repo
         self.labels = labels
         self.blocking_labels = blocking_labels
+        self.pull_requests = pull_requests
         self.missing_pull_requests = []
         self.release_branch = release_branch
         self.main_branch = main_branch
@@ -83,6 +87,9 @@ class CherryTreeBranch:
             new_prs = get_issues_from_labels(self.repo, label, prs_only=True)
             click.secho(f' ({len(new_prs)} labels found)', fg="cyan")
             prs += new_prs
+
+        for pull_request in pull_requests:
+            prs.append(get_issue(self.repo, pull_request))
         prs = deduplicate_prs(prs)
 
         # add all PRs that are flagged as blocking

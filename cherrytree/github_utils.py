@@ -1,7 +1,7 @@
 import os
 import re
 from collections import OrderedDict
-from typing import List, Optional, Reversible, Sequence
+from typing import List, Optional, Reversible
 
 import delegator
 from git import Commit
@@ -41,6 +41,15 @@ def get_issues_from_labels(repo: str, label: str, prs_only: bool = False) -> Lis
     if prs_only:
         return [o for o in issues if o.pull_request]
     return [o for o in issues]
+
+
+def get_issue(repo: str, id_: int) -> Optional[Issue]:
+    gh_repo = get_repo(repo)
+    try:
+        return gh_repo.get_issue(id_)
+    except UnknownObjectException:
+        # unknown id
+        return None
 
 
 def get_commits(repo: str, branch: str, since=None):
