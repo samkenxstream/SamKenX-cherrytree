@@ -1,10 +1,9 @@
 from collections import OrderedDict
 from datetime import datetime
-from typing import Dict, List, Optional, Sequence
+from typing import Dict, List, Optional
 
 import click
 from git import Commit
-from git.repo import Repo
 from github.Issue import Issue
 
 from cherrytree.github_utils import (
@@ -13,6 +12,7 @@ from cherrytree.github_utils import (
     get_issue,
     get_issues_from_labels,
     git_get_current_head,
+    get_git_repo,
     os_system,
     truncate_str,
 )
@@ -56,7 +56,7 @@ class CherryTreeBranch:
         self.missing_pull_requests = []
         self.release_branch = release_branch
         self.main_branch = main_branch
-        self.git_repo = Repo()
+        self.git_repo = get_git_repo()
         self.base_ref = self.get_base()
         self.blocking_pr_ids = []
 

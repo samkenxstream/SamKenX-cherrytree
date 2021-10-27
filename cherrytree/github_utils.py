@@ -1,10 +1,12 @@
 import os
 import re
 from collections import OrderedDict
-from typing import List, Optional, Reversible
+from typing import Generator, List, Optional, Reversible
 
 import delegator
 from git import Commit
+from git.exc import InvalidGitRepositoryError
+from git.repo import Repo
 from github import Github
 from github.Label import Label
 from github.Issue import Issue
@@ -124,3 +126,33 @@ def deduplicate_prs(prs: List[Issue]) -> List[Issue]:
             ret.append(pr)
             pr_set.add(pr.number)
     return ret
+
+
+def get_git_repo() -> Repo:
+    """
+    Find the path containing the git repo. Start by checking the current working
+    directory, and proceed up the directory tree if a git repo can't be found.
+
+    returns: Paath to closest git repo
+    raises FileNotFoundError: if no git repo is found in the current path
+    """
+    def _traverse_dirs(path: str) -> Generator[str, None, None]:
+        # first yield the current directory
+        yield path
+        # then start yielding parents until we reach the root
+        while True:
+            parent = os.path.dirname(path)
+            if path != parent:
+                yield parent
+                path = parent
+            else:
+                break
+
+    cwd = os.getcwd()
+    for dir_ in _traverse_dirs(cwd):
+        try:
+            repo = Repo(dir_)
+            return repo
+        except InvalidGitRepositoryError:
+            pass
+    raise FileNotFoundError("No git repo found in path: {}". format(cwd))
