@@ -5,7 +5,7 @@ import subprocess
 
 from setuptools import find_packages, setup
 
-VERSION =  '2.0.0'
+VERSION =  '2.0.1'
 REPO = 'https://github.com/apache-superset/cherrytree'
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
