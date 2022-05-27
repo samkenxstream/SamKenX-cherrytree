@@ -19,21 +19,34 @@ from cherrytree.classes import CherryTreeExecutionException
 PR_REGEX = re.compile(r"(^Merge pull request #(\d+) from|\(#(\d+)\)$)")
 
 
-def get_github_instance() -> Github:
-    token = os.environ.get("GITHUB_TOKEN")
-    if not token:
-        raise Exception("Env var 'GITHUB_TOKEN' is missing")
-    return Github(token)
+def get_github_instance(access_token: str) -> Github:
+    return Github(access_token)
 
 
-def get_repo(repo: str) -> Repository:
-    g = get_github_instance()
+def get_access_token(access_token: Optional[str]) -> str:
+    if access_token:
+        return access_token
+
+    access_token = os.environ.get("GITHUB_TOKEN")
+    if not access_token:
+        raise NotImplementedError("Env var 'GITHUB_TOKEN' is missing")
+
+    return access_token
+
+
+def get_repo(repo: str, access_token: str) -> Repository:
+    g = get_github_instance(access_token)
     return g.get_repo(repo)
 
 
-def get_issues_from_labels(repo: str, label: str, prs_only: bool = False) -> List[Issue]:
+def get_issues_from_labels(
+        repo: str,
+        access_token: str,
+        label: str,
+        prs_only: bool = False,
+) -> List[Issue]:
     label_objects: List[Label] = []
-    gh_repo = get_repo(repo)
+    gh_repo = get_repo(repo, access_token)
     try:
         label_objects.append(gh_repo.get_label(label))
     except UnknownObjectException:
@@ -45,8 +58,8 @@ def get_issues_from_labels(repo: str, label: str, prs_only: bool = False) -> Lis
     return [o for o in issues]
 
 
-def get_issue(repo: str, id_: int) -> Optional[Issue]:
-    gh_repo = get_repo(repo)
+def get_issue(repo: str, access_token: str, id_: int) -> Optional[Issue]:
+    gh_repo = get_repo(repo, access_token)
     try:
         return gh_repo.get_issue(id_)
     except UnknownObjectException:
@@ -54,9 +67,9 @@ def get_issue(repo: str, id_: int) -> Optional[Issue]:
         return None
 
 
-def get_commits(repo: str, branch: str, since=None):
+def get_commits(repo: str, access_token: str, branch: str, since=None):
     """Get commit objects from a branch, over a limited period"""
-    gh_repo = get_repo(repo)
+    gh_repo = get_repo(repo, access_token)
     branch_object = gh_repo.get_branch(branch)
     sha = branch_object.commit.sha
     if since:

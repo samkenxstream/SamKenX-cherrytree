@@ -9,6 +9,7 @@ from github.Issue import Issue
 from cherrytree.github_utils import (
     commit_pr_number,
     deduplicate_prs,
+    get_access_token,
     get_issue,
     get_issues_from_labels,
     git_get_current_head,
@@ -48,6 +49,7 @@ class CherryTreeBranch:
         labels: List[str],
         blocking_labels: List[str],
         pull_requests: List[int],
+        access_token: Optional[str],
     ):
         self.repo = repo
         self.labels = labels
@@ -59,6 +61,13 @@ class CherryTreeBranch:
         self.git_repo = get_git_repo()
         self.base_ref = self.get_base()
         self.blocking_pr_ids = []
+        try:
+            self.access_token = get_access_token(access_token)
+        except NotImplementedError:
+            click.secho(
+                f"No access token provided. Either provide one via the --access-token "
+                f"parameter, or set the GITHUB_TOKEN env variable", fg="red")
+            exit(1)
 
         click.secho(f"Base ref is {self.base_ref}", fg="cyan")
 
@@ -84,21 +93,34 @@ class CherryTreeBranch:
         prs: List[Issue] = []
         for label in self.labels:
             click.secho(f'Fetching labeled PRs: "{label}"', fg="cyan", nl=False)
-            new_prs = get_issues_from_labels(self.repo, label, prs_only=True)
+            new_prs = get_issues_from_labels(
+                repo=self.repo,
+                access_token=self.access_token,
+                label=label,
+                prs_only=True,
+            )
             click.secho(f' ({len(new_prs)} labels found)', fg="cyan")
             prs += new_prs
 
         for pull_request in pull_requests:
-            prs.append(get_issue(self.repo, pull_request))
+            prs.append(get_issue(self.repo, self.access_token, pull_request))
         prs = deduplicate_prs(prs)
 
         # add all PRs that are flagged as blocking
         for label in self.blocking_labels:
-            click.secho(f'Fetching labeled PRs: "{label}"', fg="cyan", nl=False)
-            new_prs = get_issues_from_labels(self.repo, label, prs_only=True)
-            click.secho(f' ({len(new_prs)} labels found)', fg="cyan")
-            self.blocking_pr_ids += [pr.number for pr in new_prs]
-            prs += new_prs
+            click.secho(
+                f'Fetching labeled PRs marked as blocking: "{label}"',
+                fg="cyan",
+                nl=False,
+            )
+            blocking_prs = get_issues_from_labels(
+                repo=self.repo,
+                access_token=self.access_token,
+                label=label,
+                prs_only=True,
+            )
+            click.secho(f' ({len(blocking_prs)} blocking labels found)', fg="cyan")
+            self.blocking_pr_ids += [pr.number for pr in blocking_prs]
         prs = deduplicate_prs(prs)
         now = datetime.now()
         prs.sort(

@@ -74,37 +74,30 @@ Usage: cherrytree bake [OPTIONS] RELEASE_BRANCH
 Options:
   -t, --target-branch TEXT        target branch for baking. Leave empty for
                                   dry run
-
   -m, --main_branch TEXT          name of branch containing cherries, usually
                                   `master` or `main`
-
   -r, --repo TEXT                 The name of the main repo. Example:
                                   apache/superset  [required]
-
   -l, --label TEXT                Name of label to use for cherry picking.
                                   Supports multiple labels, e.g. `-l Label1 -l
                                   Label2`
-
   -b, --blocking-label TEXT       Name of labels to block cherry picking
                                   operation. Supports multiple labels, e.g.
                                   `-b Blocker1 -b Blocker2`
-
   -pr, --pull-request TEXT        Pull request id to add to list of cherries
                                   to pick. Supports multiple ids, e.g. `-pr
                                   1234 -pr 5678`
-
   -nd, --no-dryrun                Should cherries be committed to target
-                                  branch  [default: False]
-
+                                  branch
   -e, --error-mode [break|dryrun|skip]
                                   What to do in case of an error. `skip` skips
                                   conflicted cherries, `dryrun` reverts to
                                   dryrun for subsequent prs and `break` stops
                                   cherry picking.  [default: skip]
-
   -f, --force-rebuild-target      Forcefully remove target branch before
                                   applying cherries. Only relevant when using
-                                  `--target-branch`  [default: False]
-
+                                  `--target-branch`
+  -at, --access-token TEXT        GitHub access token. If left undefined, will
+                                  use the GITHUB_TOKEN environment variable
   --help                          Show this message and exit.
 ```
